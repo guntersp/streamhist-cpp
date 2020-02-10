@@ -31,10 +31,10 @@ histograms in Go <https://github.com/VividCortex/gohistogram>`__.
 License
 =======
 
-| Copyright © 2015 Carson Farmer carsonfarmer@gmail.com
-| Copyright © 2013 VividCortex
-| All rights reserved. MIT Licensed.
-| Copyright © 2013 BigML
-| Licensed under the Apache License, Version 2.0
+* Copyright © 2015 Carson Farmer carsonfarmer@gmail.com
+* Copyright © 2013 VividCortex
+* All rights reserved. MIT Licensed.
+* Copyright © 2013 BigML
+* Licensed under the Apache License, Version 2.0
 
 
