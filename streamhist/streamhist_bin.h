@@ -172,11 +172,11 @@ struct Bin {
      *     The bin that will be merged with this bin.
      */
     inline constexpr Bin operator+(const Bin& o) const noexcept {
-        Bin b(0., count + o.count);  // Summed heights
+        Bin b({}, count + o.count);  // Summed heights
         if (b.count != 0) {
+            using streamhist::utils::combine;
             // Weighted average
-            b.value = (value * static_cast<double>(count) + o.value * static_cast<double>(o.count));
-            b.value /= static_cast<double>(b.count);
+            b.value = combine(value, count, o.value, o.count);
         }
         return std::move(b);
     }

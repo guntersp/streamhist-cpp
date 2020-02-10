@@ -83,66 +83,28 @@ inline static auto argmin_bin_diff(Iterator begin, Iterator end, bool weighted =
 }
 
 template <typename Iterator>
-inline static auto bin_sums(Iterator begin, Iterator end) noexcept {
+inline static auto prepare_sums(Iterator begin, Iterator end) noexcept {
 
     std::vector<double> res;
-    if (end - begin <= 1) {
+    if (begin == end) {
         return res;
     }
 
-    res.reserve(end - begin - 1);
+    res.reserve(end - begin);
 
-    auto it1(begin);
-    auto it2(it1);
-    ++it2;
+    auto it(begin);
 
 
-    while (it2 != end) {
-        auto v((it1->count + it2->count) * 0.5);
-        res.push_back(v);
+    size_t sum = 0;
+    while (it != end) {
+        auto& b(*it);
+        sum += b.count;
 
-        ++it1;
-        ++it2;
+        res.push_back(static_cast<double>(sum) - (b.count > 1 ? static_cast<double>(b.count) * 0.5 : 0.));
+
+        ++it;
     }
     return res;
-}
-
-template <typename Iterator>
-inline static auto bin_sums(Iterator begin, Iterator end, double less) noexcept {
-
-    std::vector<double> res;
-    if (end - begin <= 1) {
-        return res;
-    }
-
-    res.reserve(end - begin - 1);
-
-    auto it1(begin);
-    auto it2(it1);
-    ++it2;
-
-
-    while (it2 != end) {
-        if (it2.value <= less) {
-            auto v((it1->count + it2->count) * 0.5);
-            res.push_back(v);
-        }
-
-        ++it1;
-        ++it2;
-    }
-    return res;
-}
-
-template <typename Iterator>
-inline static void accumulate(Iterator begin, Iterator end) noexcept {
-    double total = 0.;
-    while (begin != end) {
-        total += *begin;
-        *begin = total;
-
-        ++begin;
-    }
 }
 
 /// Custom version of numpy's linspace to avoid numpy depenency.
@@ -174,6 +136,19 @@ inline static constexpr bool roots(double a, double b, double c, double& r1, dou
         r2 = (-b - sqrt(d)) / (2.0 * a);
         return true;
     }
+}
+
+/// Weighted average
+inline static constexpr double combine(double v1, size_t c1, double v2, size_t c2) noexcept {
+    auto value = (v1 * static_cast<double>(c1) + v2 * static_cast<double>(c2));
+    value /= static_cast<double>(c1 + c2);
+    return value;
+}
+
+/// Weighted average
+template <typename ValueType>
+inline static constexpr ValueType combine(const ValueType& v1, size_t c1, const ValueType& v2, size_t c2) noexcept {
+    return v1.combine(c1, v2, c2);
 }
 
 }  // namespace utils

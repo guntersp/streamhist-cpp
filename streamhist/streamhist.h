@@ -112,7 +112,7 @@ struct StreamHist {
     }
 
     /// Add a point to the histogram.
-    inline constexpr StreamHist& update(double n, size_t count = 1) noexcept {
+    inline constexpr StreamHist& update(const ValueType& n, size_t count = 1) noexcept {
         if (std::isnan(n)) {
             // We simply keep a count of the number of missing values
             missing_count += count;
@@ -124,7 +124,7 @@ struct StreamHist {
     }
 
     /// Add a point to the histogram.
-    inline constexpr StreamHist& updateValues(double n) noexcept { return update(n); }
+    inline constexpr StreamHist& updateValues(const ValueType& n) noexcept { return update(n); }
 
     /// Add a point to the histogram.
     template <typename Container>
@@ -167,7 +167,7 @@ struct StreamHist {
      * >>> # Using update
      * >>> h = StreamHist().update([1, 2, 3])
      */
-    inline constexpr StreamHist& insert(double n, size_t count = 1) noexcept {
+    inline constexpr StreamHist& insert(const ValueType& n, size_t count = 1) noexcept {
         update_total(count);
 
         if (_min > n) {
@@ -241,7 +241,16 @@ struct StreamHist {
             return std::numeric_limits<double>::quiet_NaN();
         }
 
-        if (bins.size() >= maxbins) {
+
+        /**
+         * bug fix e.g. for:
+         * - update([0, 0, 1, 1])
+         * -> total = 4
+         * -> len(bins) = 2
+         * -> index out of range
+         */
+        // if (bins.size() >= maxbins) {
+        if (bins.size() != total) {
             // Return the approximate median
             return quantiles(0.5).front();
         }
@@ -580,27 +589,64 @@ public:
 
 private:
     template <typename List1, typename List2>
-    inline void quantilesInt(List1& result, const List2& sums, double x) const noexcept {
-        auto target_sum = x * static_cast<double>(total);
-        if (x <= 0) {
+    inline void quantilesInt(List1& result, const List2& sums, double q) const noexcept {
+        if (q <= 0.) {
             result.push_back(_min);
-        } else if (x >= total) {
+            return;
+        }
+
+        if (q >= 1.) {
             result.push_back(_max);
+            return;
+        }
+
+        auto target_sum = q * static_cast<double>(total - 1) + 1;
+        auto it         = std::upper_bound(sums.begin(), sums.end(), target_sum);
+        auto i(it - sums.begin());
+
+        double l0(_min);
+        size_t l1(0);
+        double s(target_sum);
+        if (it != sums.begin()) {
+            auto& b(bins[i - 1]);
+            l0 = b.value;
+            l1 = b.count;
+            s -= sums[i - 1];
         } else {
-            auto  it = std::lower_bound(sums.begin(), sums.end(), target_sum);
-            auto  index(it - sums.begin());
-            auto& bin_i(bins[index]);
-            auto* bin_i1(&bin_i);
-            if (it != sums.end()) {
-                bin_i1 = &bins[index + 1];
+            s -= 1;
+        }
+
+        double r0(_max);
+        size_t r1(0);
+        if (it != sums.end()) {
+            auto& b(bins[i]);
+            r0 = b.value;
+            r1 = b.count;
+        }
+
+        if (l1 <= 1 && r1 <= 1) {
+            // We have exact info at this quantile.  Match linear interpolation
+            // strategy of numpy.quantile().
+            if (r1 > 0) {
+                result.push_back(l0 + (r0 - l0) * s / static_cast<double>(r1));
             } else {
-                bin_i1 = &bins[index];
+                result.push_back(l0);
             }
-            double prev_sum = 0.;
-            if (index > 0) {
-                prev_sum = sums[index - 1];
+
+        } else {
+            if (r1 == 1) {
+                // For exact bin on RHS, compensate for trapezoid interpolation using
+                // only half of count.
+                r1 = 2;
             }
-            result.push_back(Bin::compute_quantile(target_sum, bin_i, *bin_i1, prev_sum + 1));
+            double bp_ratio {};
+            if (l1 == r1) {
+                bp_ratio = s / static_cast<double>(l1);
+            } else {
+                auto d(static_cast<double>(l1) - static_cast<double>(r1));
+                bp_ratio = (static_cast<double>(l1) - std::sqrt(static_cast<double>(l1 * l1) - 2 * s * d)) / d;
+            }
+            result.push_back(bp_ratio * (r0 - l0) + l0);
         }
     }
 
@@ -620,8 +666,7 @@ public:
      * single quantile is input, a list is always returned.
      */
     inline auto quantiles(double quantiles) const noexcept {
-        auto sums(utils::bin_sums(bins.begin(), bins.end()));
-        utils::accumulate(sums.begin(), sums.end());
+        auto sums(utils::prepare_sums(bins.begin(), bins.end()));
 
         std::vector<double> result;
         quantilesInt(result, sums, quantiles);
@@ -636,8 +681,7 @@ public:
      */
     template <typename... Quantile>
     inline auto quantiles(Quantile... quantiles) const noexcept {
-        auto sums(utils::bin_sums(bins.begin(), bins.end()));
-        utils::accumulate(sums.begin(), sums.end());
+        auto sums(utils::prepare_sums(bins.begin(), bins.end()));
 
         std::vector<double> result;
         if constexpr (sizeof...(quantiles) > 0) {
@@ -654,8 +698,7 @@ public:
      */
     template <typename List>
     inline auto quantiles(const List& quantiles) const noexcept {
-        auto sums(utils::bin_sums(bins.begin(), bins.end()));
-        utils::accumulate(sums.begin(), sums.end());
+        auto sums(utils::prepare_sums(bins.begin(), bins.end()));
 
         std::vector<double> result;
         for (auto x : quantiles) {
