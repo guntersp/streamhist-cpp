@@ -31,6 +31,7 @@ histograms in Go <https://github.com/VividCortex/gohistogram>`__.
 License
 =======
 
+* Copyright © 2020 Gunter Spöcker guntersp0@gmail.com
 * Copyright © 2015 Carson Farmer carsonfarmer@gmail.com
 * Copyright © 2013 VividCortex
 * All rights reserved. MIT Licensed.
