@@ -179,9 +179,13 @@ struct StreamHist {
 
         Bin b { n, count };
 
+        using streamhist::utils::integrate;
+
         auto it(bins.find(b));
         if (it != bins.end()) {
-            it->count += count;
+            auto& b(*it);
+            integrate(b.value, b.count, n, count);
+            b.count += count;
 
         } else {
             if (freeze != static_cast<size_t>(-1) && total >= freeze) {
@@ -198,10 +202,14 @@ struct StreamHist {
                 }
 
                 if (prev_dist < next_dist) {
-                    bins[index - 1].count += count;
+                    auto& b(bins[index - 1]);
+                    integrate(b.value, b.count, n, count);
+                    b.count += count;
 
                 } else {
-                    bins[index].count += count;
+                    auto& b(bins[index]);
+                    integrate(b.value, b.count, n, count);
+                    b.count += count;
                 }
 
             } else {

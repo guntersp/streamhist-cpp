@@ -151,6 +151,17 @@ inline static constexpr ValueType combine(const ValueType& v1, size_t c1, const 
     return v1.combine(c1, v2, c2);
 }
 
+/// do not change the value of "v1" while integrating the value v2
+inline static constexpr void integrate(double& /*v1*/, size_t /*c1*/, double /*v2*/, size_t /*c2*/) noexcept {
+    // nothing to do here
+}
+
+/// Weighted average
+template <typename ValueType>
+inline static constexpr void integrate(ValueType& v1, size_t c1, const ValueType& v2, size_t c2) noexcept {
+    v1.integrate(c1, v2, c2);
+}
+
 }  // namespace utils
 }  // namespace streamhist
 
