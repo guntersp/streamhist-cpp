@@ -177,11 +177,11 @@ struct StreamHist {
             _max = n;
         }
 
-        Bin b { n, count };
+        Bin bin { n, count };
 
         using streamhist::utils::integrate;
 
-        auto it(bins.find(b));
+        auto it(bins.find(bin));
         if (it != bins.end()) {
             auto& b(*it);
             integrate(b.value, b.count, n, count);
@@ -189,7 +189,7 @@ struct StreamHist {
 
         } else {
             if (freeze != static_cast<size_t>(-1) && total >= freeze) {
-                size_t index = bins.bisect(b);
+                size_t index = bins.bisect(bin);
 
                 double prev_dist = (std::numeric_limits<double>::max)();
                 if (index > 0) {
@@ -213,7 +213,7 @@ struct StreamHist {
                 }
 
             } else {
-                bins.add(std::move(b));
+                bins.add(std::move(bin));
             }
         }
 
@@ -616,10 +616,10 @@ private:
         size_t l1(0);
         double s(target_sum);
         if (it != sums.begin()) {
-            auto& b(bins[i - 1]);
+            auto& b(bins[static_cast<size_t>(i - 1)]);
             l0 = b.value;
             l1 = b.count;
-            s -= sums[i - 1];
+            s -= sums[static_cast<size_t>(i - 1)];
         } else {
             s -= 1;
         }
@@ -627,7 +627,7 @@ private:
         double r0(_max);
         size_t r1(0);
         if (it != sums.end()) {
-            auto& b(bins[i]);
+            auto& b(bins[static_cast<size_t>(i)]);
             r0 = b.value;
             r1 = b.count;
         }

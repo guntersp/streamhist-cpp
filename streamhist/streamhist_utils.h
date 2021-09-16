@@ -90,7 +90,7 @@ inline static auto prepare_sums(Iterator begin, Iterator end) noexcept {
         return res;
     }
 
-    res.reserve(end - begin);
+    res.reserve(static_cast<size_t>(end - begin));
 
     auto it(begin);
 

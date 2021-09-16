@@ -14,8 +14,7 @@
  */
 
 #include "streamhist/streamhist.h"
-
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 #include <fstream>
 #include <random>
@@ -2114,7 +2113,7 @@ inline static bool compareBins(List1& l1, List2& l2, double rtol = 1e-05, double
 }
 
 
-TEST(StreamhistHistogram, test_update_vs_insert) {
+TEST_CASE("test_update_vs_insert", "StreamhistHistogram") {
     size_t points = 1000;
     auto   data   = make_normal(points);
     Hist   h1(50);
@@ -2126,118 +2125,118 @@ TEST(StreamhistHistogram, test_update_vs_insert) {
     }
     h2.trim();
 
-    EXPECT_EQ(h1, h2);
+    REQUIRE(h1 == h2);
 }
 
 
-TEST(StreamhistHistogram, test_cdf_pdf) {
+TEST_CASE("test_cdf_pdf", "StreamhistHistogram") {
     size_t points = 10000;
     Hist   h;
 
     auto data = make_normal(points);
     h.update(data);
 
-    EXPECT_TRUE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
 }
 
 
-TEST(StreamhistHistogram, test_bounds) {
+TEST_CASE("test_bounds", "StreamhistHistogram") {
     Hist h(8);
     for (size_t i = 0; i < 15; i++) {
         h.update(static_cast<double>(i));
     }
 
     std::pair<double, double> b1 { 0, 14 };
-    EXPECT_TRUE(h.bounds() == b1);
+    REQUIRE(h.bounds() == b1);
 
     h = Hist {};
     std::pair<double, double> b2;
-    EXPECT_TRUE(h.bounds() == b2);
+    REQUIRE(h.bounds() == b2);
 }
 
 
-TEST(StreamhistHistogram, test_count) {
+TEST_CASE("test_count", "StreamhistHistogram") {
     size_t points = 15;
     Hist   h;
     h.update(make_normal(points));
 
-    EXPECT_EQ(h.count(), h.total);
-    EXPECT_EQ(h.count(), points);
+    REQUIRE(h.count() == h.total);
+    REQUIRE(h.count() == points);
 }
 
 
-TEST(StreamhistHistogram, test_median_mean) {
+TEST_CASE("test_median_mean", "StreamhistHistogram") {
     size_t points = 10000;
     Hist   h;
     for (auto p : make_uniform(points)) {
         h.update(p);
     }
-    EXPECT_TRUE(about(h.median(), 0.5, 0.05));
+    REQUIRE(about(h.median(), 0.5, 0.05));
 
 
     h = Hist {};
     for (auto p : make_normal(points)) {
         h.update(p);
     }
-    EXPECT_TRUE(about(h.median(), 0., 0.05));
-    EXPECT_TRUE(about(h.mean(), 0., 0.05));
+    REQUIRE(about(h.median(), 0., 0.05));
+    REQUIRE(about(h.mean(), 0., 0.05));
 }
 
 
-TEST(StreamhistHistogram, test_exact_median) {
+TEST_CASE("test_exact_median", "StreamhistHistogram") {
     Hist h(17);
     for (size_t i = 0; i < 15; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.median(), 7);
+    REQUIRE(h.median() == 7);
 
 
     h = Hist(17);
     for (size_t i = 0; i < 16; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.median(), 7.5);
+    REQUIRE(h.median() == 7.5);
 }
 
 
-TEST(StreamhistHistogram, test_mean) {
+TEST_CASE("test_mean", "StreamhistHistogram") {
     size_t points = 1001;
     Hist   h;
     for (size_t i = 0; i < points; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.mean(), (points - 1) / 2.0);
+    REQUIRE(h.mean() == (points - 1) / 2.0);
 }
 
 
-TEST(StreamhistHistogram, test_var) {
-    EXPECT_TRUE(std::isnan(Hist().update(1.).var()));
+TEST_CASE("test_var", "StreamhistHistogram") {
+    REQUIRE(std::isnan(Hist().update(1.).var()));
     Hist   h;
     double data[] = { 1, 1, 2, 3, 4, 5, 6, 6 };
     for (auto p : data) {
         h.update(p);
     }
-    EXPECT_EQ(h.var(), 3.75);
+    REQUIRE(h.var() == 3.75);
     h = Hist();
     for (auto p : make_normal(10000)) {
         h.update(p);
     }
-    EXPECT_TRUE(about(h.var(), 1., 0.05));
+    REQUIRE(about(h.var(), 1., 0.05));
 }
 
 
-TEST(StreamhistHistogram, test_min_max) {
+TEST_CASE("test_min_max", "StreamhistHistogram") {
     Hist h;
 
-    EXPECT_EQ(h.min(), std::numeric_limits<double>::max());
-    EXPECT_EQ(h.max(), -std::numeric_limits<double>::max());
+    REQUIRE(h.min() == std::numeric_limits<double>::max());
+    REQUIRE(h.max() == -std::numeric_limits<double>::max());
 
     for (size_t i = 0; i < 1000; i++) {
         h.update(static_cast<double>(rand_int(10)));
     }
 
-    EXPECT_EQ(h.min(), 0);
-    EXPECT_EQ(h.max(), 10);
+    REQUIRE(h.min() == 0);
+    REQUIRE(h.max() == 10);
 
     Hist h1;
     Hist h2;
@@ -2247,20 +2246,20 @@ TEST(StreamhistHistogram, test_min_max) {
     }
     auto merged = h1.merge(h2);
 
-    EXPECT_EQ(merged.min(), 0);
-    EXPECT_EQ(merged.max(), 5);
+    REQUIRE(merged.min() == 0);
+    REQUIRE(merged.max() == 5);
 }
 
 
-TEST(StreamhistHistogram, test_trim) {
+TEST_CASE("test_trim", "StreamhistHistogram") {
     size_t points = 1000;
     Hist   h(10);
     for (size_t i = 0; i < points; i++) {
         h.update(static_cast<double>(rand_int(10)));
     }
 
-    EXPECT_EQ(h.len(), 10);
-    EXPECT_EQ(h.total, points);
+    REQUIRE(h.len() == 10);
+    REQUIRE(h.total == points);
 
 
     h = Hist(10);
@@ -2269,14 +2268,14 @@ TEST(StreamhistHistogram, test_trim) {
         h.trim();
     }
 
-    EXPECT_EQ(h.len(), 10);
-    EXPECT_EQ(h.total, points);
+    REQUIRE(h.len() == 10);
+    REQUIRE(h.total == points);
 }
 
 
-TEST(StreamhistHistogram, test_string) {
+TEST_CASE("test_string", "StreamhistHistogram") {
     Hist h(5);
-    EXPECT_EQ(h.str(), "Empty histogram");
+    REQUIRE(h.str() == "Empty histogram");
 
     for (size_t i = 0; i < 5; i++) {
         h.update(static_cast<double>(i));
@@ -2285,11 +2284,11 @@ TEST(StreamhistHistogram, test_string) {
     std::string s = "Mean\tCount\n----\t-----\n";
     s += "0\t1\n1\t1\n2\t1\n3\t1\n4\t1";
     s += "\n----\t-----\nMissing values: 0\nTotal count: 5";
-    EXPECT_EQ(h.str(), s);
+    REQUIRE(h.str() == s);
 }
 
 
-/*TEST(StreamhistHistogram, test_round_trip) {
+/*TEST_CASE("test_round_trip", "StreamhistHistogram") {
     // Tests to_dict and from_dict
     Hist h;
     h.update(1, 1, 4);
@@ -2297,44 +2296,44 @@ TEST(StreamhistHistogram, test_string) {
 }*/
 
 
-TEST(StreamhistHistogram, test_len) {
+TEST_CASE("test_len", "StreamhistHistogram") {
     Hist h(5);
-    EXPECT_EQ(h.len(), 0);
+    REQUIRE(h.len() == 0);
     for (size_t i = 0; i < 5; i++) {
         h.update(static_cast<double>(i));
     }
 
-    EXPECT_EQ(h.len(), h.bins.size());
-    EXPECT_EQ(h.len(), 5);
+    REQUIRE(h.len() == h.bins.size());
+    REQUIRE(h.len() == 5);
     for (size_t i = 0; i < 5; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.len(), h.bins.size());
-    EXPECT_EQ(h.len(), 5);
+    REQUIRE(h.len() == h.bins.size());
+    REQUIRE(h.len() == 5);
 }
 
 
-TEST(StreamhistHistogram, test_update_total) {
+TEST_CASE("test_update_total", "StreamhistHistogram") {
     Hist h(5);
-    EXPECT_EQ(h.len(), 0);
+    REQUIRE(h.len() == 0);
     for (size_t i = 0; i < 5; i++) {
         h.update(static_cast<double>(i));
     }
 
-    EXPECT_EQ(h.total, h.count());
-    EXPECT_EQ(h.total, 5);
+    REQUIRE(h.total == h.count());
+    REQUIRE(h.total == 5);
     for (size_t i = 0; i < 5; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.total, h.count());
-    EXPECT_EQ(h.total, 10);
+    REQUIRE(h.total == h.count());
+    REQUIRE(h.total == 10);
 }
 
 
-TEST(StreamhistHistogram, test_merge) {
-    EXPECT_EQ(Hist().merge(Hist()).bins.size(), 0);
-    EXPECT_EQ(Hist().merge(Hist().update(double(1))).bins.size(), 1);
-    EXPECT_EQ(Hist().update(double(1)).merge(Hist()).bins.size(), 1);
+TEST_CASE("test_merge", "StreamhistHistogram") {
+    REQUIRE(Hist().merge(Hist()).bins.size() == 0);
+    REQUIRE(Hist().merge(Hist().update(double(1))).bins.size() == 1);
+    REQUIRE(Hist().update(double(1)).merge(Hist()).bins.size() == 1);
 
     size_t points = 1000;
     size_t count  = 10;
@@ -2346,7 +2345,7 @@ TEST(StreamhistHistogram, test_merge) {
         }
         merged.merge(h);
     }
-    EXPECT_TRUE(about(merged.sum(0), (points * count) / 2.0, (points * count) / 50.0));
+    REQUIRE(about(merged.sum(0), (points * count) / 2.0, (points * count) / 50.0));
 
     Hist h1;
     h1.update(double(1));
@@ -2354,44 +2353,44 @@ TEST(StreamhistHistogram, test_merge) {
     Hist h2;
     h2.update(double(2));
     merged = h1.merge(h2);
-    EXPECT_EQ(merged.total, 2);
+    REQUIRE(merged.total == 2);
 }
 
 
-TEST(StreamhistHistogram, test_copy) {
+TEST_CASE("test_copy", "StreamhistHistogram") {
     Hist h1;
     auto h2 = h1;  //.copy()
-    EXPECT_EQ(h1.bins, h2.bins);
+    REQUIRE(h1.bins == h2.bins);
     h1.update(make_normal(1000));
-    EXPECT_FALSE(h1.bins == h2.bins);
+    REQUIRE(!(h1.bins == h2.bins));
     h2 = h1;  //.copy()
-    EXPECT_EQ(h1.bins, h2.bins);
+    REQUIRE(h1.bins == h2.bins);
     h1 = Hist();
     for (size_t i = 0; i < 4; i++) {
         h1.update(static_cast<double>(i));
     }
     h2 = h1;  //.copy()
-    EXPECT_EQ(h1, h2);
+    REQUIRE(h1 == h2);
 }
 
 
-TEST(StreamhistHistogram, test_describe) {
+TEST_CASE("test_describe", "StreamhistHistogram") {
     size_t points = 10000;
     auto   data   = make_uniform(points);
     Hist   h;
     h.update(data);
     auto d = h.describe(0.5);
 
-    EXPECT_TRUE(about(d["50%"], 0.5, 0.05));
-    EXPECT_TRUE(about(d["min"], 0.0, 0.05));
-    EXPECT_TRUE(about(d["max"], 1.0, 0.05));
-    EXPECT_TRUE(about(d["mean"], 0.5, 0.05));
-    EXPECT_TRUE(about(d["var"], 0.08, 0.05));
-    EXPECT_EQ(d["count"], points);
+    REQUIRE(about(d["50%"], 0.5, 0.05));
+    REQUIRE(about(d["min"], 0.0, 0.05));
+    REQUIRE(about(d["max"], 1.0, 0.05));
+    REQUIRE(about(d["mean"], 0.5, 0.05));
+    REQUIRE(about(d["var"], 0.08, 0.05));
+    REQUIRE(d["count"] == points);
 }
 
 
-TEST(StreamhistHistogram, test_compute_breaks) {
+TEST_CASE("test_compute_breaks", "StreamhistHistogram") {
     size_t points = 10000;
     size_t bins   = 25;
     // from numpy import histogram, allclose
@@ -2411,57 +2410,57 @@ TEST(StreamhistHistogram, test_compute_breaks) {
 
     // h1.print_breaks(bins);
 
-    EXPECT_TRUE(allclose(es2, es3));
-    EXPECT_TRUE(allclose(h2, h3, 1., static_cast<double>(points) / static_cast<double>(bins * bins)));
+    REQUIRE(allclose(es2, es3));
+    REQUIRE(allclose(h2, h3, 1., static_cast<double>(points) / static_cast<double>(bins * bins)));
 }
 
 
-TEST(StreamhistHistogram, test_sum) {
+TEST_CASE("test_sum", "StreamhistHistogram") {
     size_t points = 10000;
     Hist   h;
     auto   data = make_normal(points);
     h.update(data);
-    EXPECT_TRUE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
 }
 
 
-TEST(StreamhistHistogram, test_paper_example) {
+TEST_CASE("test_paper_example", "StreamhistHistogram") {
     /// Test Appendix A example from Ben-Haim paper.
     Hist h(5);
     h.updateValues(23., 19., 10., 16., 36., 2., 9.);
 
     std::vector<Hist::Bin> bins1 = { { 2, 1 }, { 9.5, 2 }, { 17.5, 2 }, { 23, 1 }, { 36, 1 } };
-    EXPECT_TRUE(compareBins(h.bins, bins1));
+    REQUIRE(compareBins(h.bins, bins1));
 
     Hist h2(5);
     h2.updateValues(32., 30., 45.);
     auto                   h3    = h + h2;
     std::vector<Hist::Bin> bins2 = { { 2, 1 }, { 9.5, 2 }, { 19.33, 3 }, { 32.67, 3 }, { 45, 1 } };
-    EXPECT_TRUE(compareBins(h3.bins, bins2, 1e-3));
-    EXPECT_TRUE(about(h3.sum(15), 3.275, 1e-3));
+    REQUIRE(compareBins(h3.bins, bins2, 1e-3));
+    REQUIRE(about(h3.sum(15), 3.275, 1e-3));
 }
 
 
-TEST(StreamhistHistogram, test_quantiles) {
+TEST_CASE("test_quantiles", "StreamhistHistogram") {
     size_t points = 10000;
     Hist   h;
     for (auto p : make_uniform(points)) {
         h.update(p);
     }
-    EXPECT_TRUE(about(h.quantiles(0.5).front(), 0.5, 0.05));
+    REQUIRE(about(h.quantiles(0.5).front(), 0.5, 0.05));
 
     h = Hist();
     for (auto p : make_normal(points)) {
         h.update(p);
     }
     auto qs(h.quantiles(0.25, 0.5, 0.75));	
-    EXPECT_TRUE(about(qs[0], -0.66, 0.05));
-    EXPECT_TRUE(about(qs[1], 0.00, 0.05));
-    EXPECT_TRUE(about(qs[2], 0.66, 0.05));
+    REQUIRE(about(qs[0], -0.66, 0.05));
+    REQUIRE(about(qs[1], 0.00, 0.05));
+    REQUIRE(about(qs[2], 0.66, 0.05));
 }
 
 
-TEST(StreamhistHistogram, test_histogram_exact) {
+TEST_CASE("test_histogram_exact", "StreamhistHistogram") {
     /// A StreamHist which is not at capacity matches numpy statistics
 	
 	size_t max_bins = 50;
@@ -2505,16 +2504,16 @@ TEST(StreamhistHistogram, test_histogram_exact) {
 			1.41160866e+01, 1.63844369e+01, 1.86908152e+01, 2.18908522e+01, 2.50908892e+01 };
 
 
-	EXPECT_TRUE(allclose(h.quantiles(q), qs, 1e-6, 1e-12));
-	EXPECT_TRUE(approx(h.mean(), 5.389901497096077, 1e-6, 1e-12));
-	EXPECT_TRUE(approx(h.var(), 26.524925740327195, 1e-6, 1e-12));
-	EXPECT_TRUE(approx(h.min(), 1.92651104e-02, 1e-6, 1e-12));
-	EXPECT_TRUE(approx(h.max(), 2.50908892e+01, 1e-6, 1e-12));
-	EXPECT_EQ(h.count(), max_bins);
+	REQUIRE(allclose(h.quantiles(q), qs, 1e-6, 1e-12));
+	REQUIRE(approx(h.mean(), 5.389901497096077, 1e-6, 1e-12));
+	REQUIRE(approx(h.var(), 26.524925740327195, 1e-6, 1e-12));
+	REQUIRE(approx(h.min(), 1.92651104e-02, 1e-6, 1e-12));
+	REQUIRE(approx(h.max(), 2.50908892e+01, 1e-6, 1e-12));
+	REQUIRE(h.count() == max_bins);
 }
 
 
-TEST(StreamhistHistogram, test_histogram_approx) {
+TEST_CASE("test_histogram_approx", "StreamhistHistogram") {
     /// Test accuracy of StreamHist over capacity, especially quantiles.
 
 
@@ -2926,33 +2925,33 @@ TEST(StreamhistHistogram, test_histogram_approx) {
             err_sum += std::abs(b - b_np) / err_denom;
         }
 
-        EXPECT_LE(err_sum, d.expected_error);
-        EXPECT_TRUE(approx(h.mean(), d.mean, 1e-6, 1e-12));
-        EXPECT_TRUE(approx(h.var(), d.var, 0.5, 1e-12));
-        EXPECT_TRUE(approx(h.min(), d.min, 1e-6, 1e-12));
-        EXPECT_TRUE(approx(h.max(), d.max, 1e-6, 1e-12));
-        EXPECT_EQ(h.count(), num_points);
+        REQUIRE(err_sum <= d.expected_error);
+        REQUIRE(approx(h.mean(), d.mean, 1e-6, 1e-12));
+        REQUIRE(approx(h.var(), d.var, 0.5, 1e-12));
+        REQUIRE(approx(h.min(), d.min, 1e-6, 1e-12));
+        REQUIRE(approx(h.max(), d.max, 1e-6, 1e-12));
+        REQUIRE(h.count() == num_points);
     }
 }
 
 
 
-TEST(StreamhistHistogram, test_density) {
+TEST_CASE("test_density", "StreamhistHistogram") {
     Hist h;
     h.updateValues(1., 2., 2., 3.);
-    EXPECT_TRUE(about(0.0, h.density(0.0), 1e-10));
-    EXPECT_TRUE(about(0.0, h.density(0.5), 1e-10));
-    EXPECT_TRUE(about(0.5, h.density(1.0), 1e-10));
-    EXPECT_TRUE(about(1.5, h.density(1.5), 1e-10));
-    EXPECT_TRUE(about(2.0, h.density(2.0), 1e-10));
-    EXPECT_TRUE(about(1.5, h.density(2.5), 1e-10));
-    EXPECT_TRUE(about(0.5, h.density(3.0), 1e-10));
-    EXPECT_TRUE(about(0.0, h.density(3.5), 1e-10));
-    EXPECT_TRUE(about(0.0, h.density(4.0), 1e-10));
+    REQUIRE(about(0.0, h.density(0.0), 1e-10));
+    REQUIRE(about(0.0, h.density(0.5), 1e-10));
+    REQUIRE(about(0.5, h.density(1.0), 1e-10));
+    REQUIRE(about(1.5, h.density(1.5), 1e-10));
+    REQUIRE(about(2.0, h.density(2.0), 1e-10));
+    REQUIRE(about(1.5, h.density(2.5), 1e-10));
+    REQUIRE(about(0.5, h.density(3.0), 1e-10));
+    REQUIRE(about(0.0, h.density(3.5), 1e-10));
+    REQUIRE(about(0.0, h.density(4.0), 1e-10));
 }
 
 
-TEST(StreamhistHistogram, test_weighted_gap) {
+TEST_CASE("test_weighted_gap", "StreamhistHistogram") {
     /**
      * Histograms using weighted gaps are less eager to merge bins with large
      * counts. This test builds weighted and non-weighted histograms using samples
@@ -2968,16 +2967,16 @@ TEST(StreamhistHistogram, test_weighted_gap) {
         h1.update(p);
         h2.update(p);
     }
-    EXPECT_TRUE(h1.bins.front().count + h1.bins.back().count > h2.bins.front().count + h2.bins.back().count);
+    REQUIRE(h1.bins.front().count + h1.bins.back().count > h2.bins.front().count + h2.bins.back().count);
 }
 
 
-TEST(StreamhistHistogram, test_hist) {
-    EXPECT_TRUE(Hist().empty());
+TEST_CASE("test_hist", "StreamhistHistogram") {
+    REQUIRE(Hist().empty());
 }
 
 
-TEST(StreamhistHistogram, test_negative_densities) {
+TEST_CASE("test_negative_densities", "StreamhistHistogram") {
     size_t points = 10000;
     Hist   h;
     for (auto p : make_normal(points)) {
@@ -2986,62 +2985,62 @@ TEST(StreamhistHistogram, test_negative_densities) {
 
     auto x(utils::linspace(h.min(), h.max(), 100));
     for (auto t : x) {
-        EXPECT_TRUE(h.pdf(t) >= 0.);
+        REQUIRE(h.pdf(t) >= 0.);
     }
 }
 
 
-TEST(StreamhistHistogram, test_weighted) {
+TEST_CASE("test_weighted", "StreamhistHistogram") {
     Hist h(3, true);
     h.updateValues(1., 2., 2., 3., 4.);
-    EXPECT_EQ(h.total, 5);
+    REQUIRE(h.total == 5);
 }
 
 
-TEST(StreamhistHistogram, test_missing) {
+TEST_CASE("test_missing", "StreamhistHistogram") {
     Hist h(2);
     h.updateValues(1., std::numeric_limits<double>::quiet_NaN(), 1., 4., 6.);
-    EXPECT_EQ(h.missing_count, 1);
-    EXPECT_EQ(h.bins.size(), 2);
-    EXPECT_EQ(h.bins[0].getitem<0>(), 1);
-    EXPECT_EQ(h.bins[1].getitem<0>(), 5);
+    REQUIRE(h.missing_count == 1);
+    REQUIRE(h.bins.size() == 2);
+    REQUIRE(h.bins[0].getitem<0>() == 1);
+    REQUIRE(h.bins[1].getitem<0>() == 5);
 }
 
 
-TEST(StreamhistHistogram, test_missing_merge) {
+TEST_CASE("test_missing_merge", "StreamhistHistogram") {
     Hist h1(8);
     h1.update(std::numeric_limits<double>::quiet_NaN());
     Hist h2(8);
-    EXPECT_TRUE(h1.merge(h2).empty());
+    REQUIRE(h1.merge(h2).empty());
 
     h1 = Hist();
     h1.update(std::numeric_limits<double>::quiet_NaN());
     h2 = Hist();
     h2.update(std::numeric_limits<double>::quiet_NaN());
     auto merged(Hist().merge(h1.merge(h2)));
-    EXPECT_EQ(merged.missing_count, 2);
+    REQUIRE(merged.missing_count == 2);
 }
 
 
-TEST(StreamhistHistogram, test_negative_zero) {
-    EXPECT_EQ(Hist().update(0.).update(-0.).bins.size(), 1);
+TEST_CASE("test_negative_zero", "StreamhistHistogram") {
+    REQUIRE(Hist().update(0.).update(-0.).bins.size() == 1);
 }
 
 
-TEST(StreamhistHistogram, test_freeze) {
+TEST_CASE("test_freeze", "StreamhistHistogram") {
     size_t points = 100000;
     Hist   h(64, false, 500);
     for (auto p : make_normal(points)) {
         h.update(p);
     }
-    EXPECT_TRUE(about(h.sum(0), points / 2.0, points / 50.0));
-    EXPECT_TRUE(about(h.median(), 0, 0.05));
-    EXPECT_TRUE(about(h.mean(), 0, 0.05));
-    EXPECT_TRUE(about(h.var(), 1, 0.05));
+    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.median(), 0, 0.05));
+    REQUIRE(about(h.mean(), 0, 0.05));
+    REQUIRE(about(h.var(), 1, 0.05));
 }
 
 
-TEST(StreamhistHistogram, test_counts) {
+TEST_CASE("test_counts", "StreamhistHistogram") {
     std::vector<double> data = { 605., 760., 610., 615., 605., 780., 605., 905. };
     Hist                h(4, false);
     for (auto p : data) {
@@ -3051,12 +3050,12 @@ TEST(StreamhistHistogram, test_counts) {
     for (auto& b : h.bins) {
         n += b.getitem<1>();
     }
-    EXPECT_EQ(data.size(), n);
-    EXPECT_EQ(h.total, n);
+    REQUIRE(data.size() == n);
+    REQUIRE(h.total == n);
 }
 
 
-TEST(StreamhistHistogram, test_multi_merge) {
+TEST_CASE("test_multi_merge", "StreamhistHistogram") {
     size_t points = 100000;
     auto   data   = make_uniform(points);
 
@@ -3070,51 +3069,51 @@ TEST(StreamhistHistogram, test_multi_merge) {
     auto q1(h1.quantiles(.1, .2, .3, .4, .5, .6, .7, .8, .9));
     auto q2(h2.quantiles(.1, .2, .3, .4, .5, .6, .7, .8, .9));
 
-    EXPECT_TRUE(allclose(q1, q2, 1., 0.025));
+    REQUIRE(allclose(q1, q2, 1., 0.025));
 }
 
 
-/*TEST(StreamhistHistogram, test_exception) {
+/*TEST_CASE("test_exception", "StreamhistHistogram") {
     Hist().sum(5);
     Hist().update(4.).sum(std::numeric_limits<double>::quiet_NaN());
 }*/
 
 
-TEST(StreamhistHistogram, test_point_density_at_zero) {
+TEST_CASE("test_point_density_at_zero", "StreamhistHistogram") {
     Hist h;
     h.update(-1.).update(0.).update(1.);
-    EXPECT_EQ(h.density(0.), 1.);
+    REQUIRE(h.density(0.) == 1.);
 
     h = Hist().update(0.);
-    EXPECT_EQ(h.density(0.), std::numeric_limits<double>::infinity());
+    REQUIRE(h.density(0.) == std::numeric_limits<double>::infinity());
 }
 
 
-TEST(StreamhistHistogram, test_sum_edges) {
+TEST_CASE("test_sum_edges", "StreamhistHistogram") {
     Hist h;
     h.update(0.).update(10.);
-    EXPECT_EQ(h.sum(5.), 1.);
-    EXPECT_EQ(h.sum(0.), 0.5);
-    EXPECT_EQ(h.sum(10.), 2.);
+    REQUIRE(h.sum(5.) == 1.);
+    REQUIRE(h.sum(0.) == 0.5);
+    REQUIRE(h.sum(10.) == 2.);
 }
 
 
-TEST(StreamhistHistogram, test_iterable) {
+TEST_CASE("test_iterable", "StreamhistHistogram") {
     Hist h;
     for (size_t i = 0; i < 4; i++) {
         h.update(static_cast<double>(i));
     }
-    EXPECT_EQ(h.total, 4);
+    REQUIRE(h.total == 4);
 
 
     h = Hist().updateValues(std::vector<double> { 1., 2., 3. }, 4., std::vector<double> { 5., 6. }, 7., 8., std::vector<double> { 9. },
                             std::vector<double> { 10., 11., 12. }, 13., 14., 15.);
-    EXPECT_EQ(h.total, 15);
-    EXPECT_EQ(h.mean(), 8);
+    REQUIRE(h.total == 15);
+    REQUIRE(h.mean() == 8);
 }
 
 
-/*TEST(StreamhistHistogram, test_print_counts) {
+/*TEST_CASE("test_print_counts", "StreamhistHistogram") {
     // This is a dummy test to test printing things...
     size_t points = 10000;
     size_t bins   = 25;
@@ -3125,15 +3124,16 @@ TEST(StreamhistHistogram, test_iterable) {
 }*/
 
 
-TEST(StreamhistHistogram, test_median_with_data) {
+TEST_CASE("test_median_with_data", "StreamhistHistogram") {
     Hist h;
 
     std::ifstream f("test_data.csv");
+    REQUIRE(!!f);
     if (f) {
         std::string line;
         while (std::getline(f, line)) {
             h.update(atof(line.c_str()));
         }
     }
-    EXPECT_TRUE(about(h.median(), 0., 0.05));
+    REQUIRE(about(h.median(), 0., 0.05));
 }

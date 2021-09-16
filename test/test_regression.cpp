@@ -15,8 +15,7 @@
 
 
 #include "streamhist/streamhist.h"
-
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 #include <random>
 
@@ -44,7 +43,7 @@ using Hist = streamhist::StreamHist<double>;
 }*/
 
 
-TEST(StreamhistRegression, regression) {
+TEST_CASE("regression", "StreamhistRegression") {
 
     /*randomcpp::seed(1700);
     auto data = make_normal(10000);*/
@@ -2073,13 +2072,13 @@ TEST(StreamhistRegression, regression) {
                             { 2.2157182954841126, 35 },
                             { 3.563619987633774, 2 } };
 
-        EXPECT_EQ(hist1.bins, reg);
+        REQUIRE(hist1.bins == reg);
     }
 
     {
         std::vector<double> reg { -1.022649473089556, -0.5279748744244142, 0.1476067074922296, 0.9815338358189885, 1.6627248917927795 };
 
-        EXPECT_EQ(hist1.quantiles(0.1, 0.25, 0.5, 0.75, 0.9), reg);
+        REQUIRE(hist1.quantiles(0.1, 0.25, 0.5, 0.75, 0.9) == reg);
     }
 
     {
@@ -2089,14 +2088,14 @@ TEST(StreamhistRegression, regression) {
                             { 0.5523120572161528, 2986 },
                             { 1.557598912751095, 1472 } };
 
-        EXPECT_EQ(hist2.bins, reg);
+        REQUIRE(hist2.bins == reg);
     }
 
     {
         std::vector<double> reg { -1.1941285587341846, -0.6041467139342105, 0.08840996549170466, 0.8247014091807423, 1.557598912751095 };
 
 
-        EXPECT_EQ(hist2.quantiles(0.1, 0.25, 0.5, 0.75, 0.9), reg);
+        REQUIRE(hist2.quantiles(0.1, 0.25, 0.5, 0.75, 0.9) == reg);
     }
 
     {
@@ -2106,30 +2105,30 @@ TEST(StreamhistRegression, regression) {
                             { 0.8105375295133331, 6483 },
                             { 1.5755221868037264, 1509 } };
 
-        EXPECT_EQ(hist3.bins, reg);
+        REQUIRE(hist3.bins == reg);
     }
 
     {
         std::vector<double> reg { -1.0074328972882012, -0.5037558708214145, 0.11958766584785563, 0.8874923692642509, 1.432517386448461 };
 
-        EXPECT_EQ(hist3.quantiles(0.1, 0.25, 0.5, 0.75, 0.9), reg);
+        REQUIRE(hist3.quantiles(0.1, 0.25, 0.5, 0.75, 0.9) == reg);
     }
 
     {
         Hist::Bin reg[] = { { 669., 1339 }, { 2675., 2673 }, { 4680.5, 1338 }, { 6685.5, 2672 }, { 9010.5, 1978 } };
 
-        EXPECT_EQ(hist4.bins, reg);
+        REQUIRE(hist4.bins == reg);
     }
 
     {
         std::vector<double> reg { 1830.581598358843, 3063.70150218845, 5831.110283907479, 8084.851093080222, 9010.5 };
 
-        EXPECT_EQ(hist4.quantiles(0.1, 0.25, 0.5, 0.75, 0.9), reg);
+        REQUIRE(hist4.quantiles(0.1, 0.25, 0.5, 0.75, 0.9) == reg);
     }
 }
 
 
-TEST(StreamhistRegression, iris_regression) {
+TEST_CASE("iris_regression", "StreamhistRegression") {
     double sepal_length[]
         = { 5.1, 4.9, 4.7, 4.6, 5.0, 5.4, 4.6, 5.0, 4.4, 4.9, 5.4, 4.8, 4.8, 4.3, 5.8, 5.7, 5.4, 5.1, 5.7, 5.1, 5.4, 5.1, 4.6, 5.1, 4.8,
             5.0, 5.0, 5.2, 5.2, 4.7, 4.8, 5.4, 5.2, 5.5, 4.9, 5.0, 5.5, 4.9, 4.4, 5.1, 5.0, 4.5, 4.4, 5.0, 5.1, 4.8, 5.1, 4.6, 5.3, 5.0,
@@ -2174,5 +2173,5 @@ TEST(StreamhistRegression, iris_regression) {
                         { 7.7, 4 },
                         { 7.9, 1 } };
 
-    EXPECT_EQ(h.bins, reg);
+    REQUIRE(h.bins == reg);
 }

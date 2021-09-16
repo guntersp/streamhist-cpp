@@ -68,9 +68,9 @@ struct SortedListWithKey {
 
     inline auto pop(typename std::vector<Item>::iterator it) noexcept { return list.erase(it); }
 
-    inline size_t bisect_left(const Item& i) const noexcept { return std::lower_bound(list.begin(), list.end(), i) - list.begin(); }
+    inline size_t bisect_left(const Item& i) const noexcept { return static_cast<size_t>(std::lower_bound(list.begin(), list.end(), i) - list.begin()); }
 
-    inline size_t bisect_right(const Item& i) const noexcept { return std::upper_bound(list.begin(), list.end(), i) - list.begin(); }
+    inline size_t bisect_right(const Item& i) const noexcept { return static_cast<size_t>(std::upper_bound(list.begin(), list.end(), i) - list.begin()); }
 
     inline size_t bisect(const Item& i) const noexcept { return bisect_right(i); }
 
