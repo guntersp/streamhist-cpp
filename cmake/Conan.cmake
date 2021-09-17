@@ -35,6 +35,8 @@ macro(run_conan)
     set(LIST_OF_BUILD_TYPES ${CMAKE_CONFIGURATION_TYPES})
   endif()
 
+
+
   foreach(TYPE ${LIST_OF_BUILD_TYPES})
     message(STATUS "Running Conan for build type '${TYPE}'")
 
@@ -43,7 +45,7 @@ macro(run_conan)
 
     # PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR} is used to tell conan to process
     # the external "conanfile.py" provided with the project
-    # Alternatively a conanfile.txt could be used 
+    # Alternatively a conanfile.txt could be used
     conan_cmake_install(
       PATH_OR_REFERENCE
       ${CMAKE_SOURCE_DIR}

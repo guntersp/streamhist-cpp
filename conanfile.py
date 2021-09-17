@@ -24,3 +24,8 @@ class StreamhistCpp(ConanFile):
     #    if self.options.cpp_starter_use_sdl == "ON":
     #        self.requires("sdl2/2.0.10@bincrafters/stable")
 
+    def build(self):
+       cmake = CMake(self)
+       cmake.configure()
+       cmake.build()
+

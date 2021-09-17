@@ -4,11 +4,14 @@
 #find_package(docopt)
 
 # Generic test that uses conan libs
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 target_sources(${PROJECT_NAME}
-  INTERFACE
+  PRIVATE
+    streamhist.cpp
+
+  PUBLIC
     streamhist_bin.h
     streamhist_container.h
     streamhist_utils.h
@@ -16,13 +19,13 @@ target_sources(${PROJECT_NAME}
   )
 
 target_include_directories(${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
     ${PROJECT_SOURCE_DIR}
   )
 
 
 target_link_libraries(${PROJECT_NAME}
-  INTERFACE 
+  PRIVATE
     project_options
     project_warnings
 #   docopt::docopt

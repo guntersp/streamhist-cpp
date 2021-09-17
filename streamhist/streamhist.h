@@ -70,7 +70,7 @@ struct StreamHist {
     inline constexpr StreamHist(size_t maxbins = 64, bool weighted = false, size_t freeze = static_cast<size_t>(-1)) noexcept
         : maxbins(maxbins)
         , weighted(weighted)
-        , freeze(freeze) {}
+        , freeze(freeze) { }
 
 
     inline constexpr bool empty() const noexcept { return total <= 0; }
@@ -439,7 +439,7 @@ public:
      */
     inline std::map<std::string, double> describe(double quantiles) const noexcept {
         std::map<std::string, double> r;
-        r["count"] = count();
+        r["count"] = static_cast<double>(count());
         r["mean"]  = mean();
         r["var"]   = var();
         r["min"]   = min();
@@ -456,17 +456,22 @@ public:
     template <typename... Quantile>
     inline std::map<std::string, double> describe(Quantile... quantiles) const noexcept {
         std::map<std::string, double> r;
-        r["count"] = count();
+        r["count"] = static_cast<double>(count());
         r["mean"]  = mean();
         r["var"]   = var();
         r["min"]   = min();
 
         if constexpr (sizeof...(quantiles) > 0) {
             describeInt(r, quantiles...);
+        } else {
+            describeInt(r, 0.25);
+            describeInt(r, 0.5);
+            describeInt(r, 0.75);
         }
         r["max"] = max();
         return r;
     }
+
 
     /**
      * Generate various summary statistics.
@@ -558,9 +563,13 @@ public:
         } else if (x >= _max) {
             return static_cast<double>(total);
         } else {
-            size_t i        = bins.bisect_right(x) - 1;  // rightmost bin lte x
-            auto   bin_i    = i >= 0 ? bins[i] : Bin(_min, 0);
-            auto   bin_i1   = i + 1 < bins.size() ? bins[i + 1] : Bin(_max, 0);
+            size_t i      = bins.bisect_right(x);  // rightmost bin lte x
+            auto   bin_i  = i > 0 ? bins[i - 1] : Bin(_min, 0);
+            auto   bin_i1 = i < bins.size() ? bins[i] : Bin(_max, 0);
+            if (i > 0) {
+                i--;
+            }
+
             double prev_sum = 0.;
             for (size_t j = 0; j < std::min(i, bins.size()); j++) {
                 prev_sum += bins[j].count;
