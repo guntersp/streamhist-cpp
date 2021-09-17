@@ -233,7 +233,7 @@ TEST_CASE("test_min_max", "StreamhistHistogram") {
     REQUIRE(h.max() == -std::numeric_limits<double>::max());
 
     for (size_t i = 0; i < 1000; i++) {
-        h.update(static_cast<double>(rand_int(10)));
+        h.update(rand_int(10));
     }
 
     REQUIRE(h.min() == 0);
@@ -256,21 +256,21 @@ TEST_CASE("test_trim", "StreamhistHistogram") {
     size_t points = 1000;
     Hist   h(10);
     for (size_t i = 0; i < points; i++) {
-        h.update(static_cast<double>(rand_int(10)));
+        h.update(rand_int(10));
     }
 
     REQUIRE(h.len() == 10);
-    REQUIRE(h.total == static_cast<double>(points));
+    REQUIRE(h.total == points);
 
 
     h = Hist(10);
     for (size_t i = 0; i < points; i++) {
-        h.insert(static_cast<double>(rand_int(10)), 1);
+        h.insert(rand_int(10), 1);
         h.trim();
     }
 
     REQUIRE(h.len() == 10);
-    REQUIRE(h.total == static_cast<double>(points));
+    REQUIRE(h.total == points);
 }
 
 
@@ -451,7 +451,7 @@ TEST_CASE("test_sum_first_half_of_first_bin", "StreamhistHistogram") {
 
     auto& bin0(h.bins[0]);
     REQUIRE(bin0.value == 0.75);
-    REQUIRE(bin0.count == 2.);
+    REQUIRE(bin0.count == 2);
     REQUIRE(h.sum(h.min()) == 0.);
     REQUIRE(h.sum((h.min() + bin0.value) / 2.) == std::pow(.5, 2) * static_cast<double>(bin0.count) / 2.);
 }
