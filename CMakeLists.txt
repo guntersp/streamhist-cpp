@@ -77,7 +77,33 @@ if(ENABLE_FUZZING)
   add_subdirectory(fuzz_test)
 endif()
 
-add_subdirectory(streamhist)
+
+
+#find_package(fmt)
+#find_package(spdlog)
+#find_package(docopt)
+
+# Generic test that uses conan libs
+add_library(${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+  )
+
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE
+    project_options
+    project_warnings
+#   docopt::docopt
+#   fmt::fmt
+#   spdlog::spdlog
+  )
+
+
+add_subdirectory(include)
+add_subdirectory(src)
 
 option(ENABLE_UNITY "Enable Unity builds of projects" OFF)
 if(ENABLE_UNITY)
