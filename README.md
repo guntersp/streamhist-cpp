@@ -1,4 +1,4 @@
-![Building](https://github.com/github/docs/actions/workflows/build_cmake.yml/badge.svg)
+![Building](https://github.com/guntersp/streamhist-cpp/actions/workflows/build_cmake.yml/badge.svg)
 
 # streamhist-cpp
 header only streamhist port in C++
