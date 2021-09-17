@@ -137,7 +137,7 @@ TEST_CASE("test_cdf_pdf", "StreamhistHistogram") {
     auto data = make_normal(points);
     h.update(data);
 
-    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.sum(0), static_cast<double>(points) / 2.0, static_cast<double>(points) / 50.0));
 }
 
 
@@ -206,7 +206,7 @@ TEST_CASE("test_mean", "StreamhistHistogram") {
     for (size_t i = 0; i < points; i++) {
         h.update(static_cast<double>(i));
     }
-    REQUIRE(h.mean() == (points - 1) / 2.0);
+    REQUIRE(h.mean() == static_cast<double>(points - 1) / 2.0);
 }
 
 
@@ -260,7 +260,7 @@ TEST_CASE("test_trim", "StreamhistHistogram") {
     }
 
     REQUIRE(h.len() == 10);
-    REQUIRE(h.total == points);
+    REQUIRE(h.total == static_cast<double>(points));
 
 
     h = Hist(10);
@@ -270,7 +270,7 @@ TEST_CASE("test_trim", "StreamhistHistogram") {
     }
 
     REQUIRE(h.len() == 10);
-    REQUIRE(h.total == points);
+    REQUIRE(h.total == static_cast<double>(points));
 }
 
 
@@ -346,7 +346,7 @@ TEST_CASE("test_merge", "StreamhistHistogram") {
         }
         merged.merge(h);
     }
-    REQUIRE(about(merged.sum(0), (points * count) / 2.0, (points * count) / 50.0));
+    REQUIRE(about(merged.sum(0), static_cast<double>(points * count) / 2.0, static_cast<double>(points * count) / 50.0));
 
     Hist h1;
     h1.update(double(1));
@@ -387,7 +387,7 @@ TEST_CASE("test_describe", "StreamhistHistogram") {
     REQUIRE(about(d["max"], 1.0, 0.05));
     REQUIRE(about(d["mean"], 0.5, 0.05));
     REQUIRE(about(d["var"], 0.08, 0.05));
-    REQUIRE(d["count"] == points);
+    REQUIRE(d["count"] == static_cast<double>(points));
 }
 
 
@@ -421,7 +421,7 @@ TEST_CASE("test_sum", "StreamhistHistogram") {
     Hist   h;
     auto   data = make_normal(points);
     h.update(data);
-    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.sum(0), static_cast<double>(points) / 2.0, static_cast<double>(points) / 50.0));
 }
 
 
@@ -453,7 +453,7 @@ TEST_CASE("test_sum_first_half_of_first_bin", "StreamhistHistogram") {
     REQUIRE(bin0.value == 0.75);
     REQUIRE(bin0.count == 2.);
     REQUIRE(h.sum(h.min()) == 0.);
-    REQUIRE(h.sum((h.min() + bin0.value) / 2.) == std::pow(.5, 2) * bin0.count / 2.);
+    REQUIRE(h.sum((h.min() + bin0.value) / 2.) == std::pow(.5, 2) * static_cast<double>(bin0.count) / 2.);
 }
 
 
@@ -1047,7 +1047,7 @@ TEST_CASE("test_freeze", "StreamhistHistogram") {
     for (auto p : make_normal(points)) {
         h.update(p);
     }
-    REQUIRE(about(h.sum(0), points / 2.0, points / 50.0));
+    REQUIRE(about(h.sum(0), static_cast<double>(points) / 2.0, static_cast<double>(points) / 50.0));
     REQUIRE(about(h.median(), 0, 0.05));
     REQUIRE(about(h.mean(), 0, 0.05));
     REQUIRE(about(h.var(), 1, 0.05));

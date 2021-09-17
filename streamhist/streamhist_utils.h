@@ -14,7 +14,7 @@ template <typename Bin>
 inline static constexpr double diff(const Bin& a, const Bin& b, bool weighted) noexcept {
     double diff(b.value - a.value);
     if (weighted) {
-        diff *= std::log(exp(1) + std::min(a.count, b.count));
+        diff *= std::log(exp(1) + static_cast<double>(std::min(a.count, b.count)));
     }
     return diff;
 }

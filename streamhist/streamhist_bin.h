@@ -178,7 +178,7 @@ struct Bin {
             // Weighted average
             b.value = combine(value, count, o.value, o.count);
         }
-        return std::move(b);
+        return b;
     }
 
     /**

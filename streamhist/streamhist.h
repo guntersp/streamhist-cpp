@@ -298,7 +298,7 @@ struct StreamHist {
         double m = mean();  // Mean
         for (auto& b : bins) {
             double v = b.value - m;
-            s += (b.count * v * v);
+            s += (static_cast<double>(b.count) * v * v);
         }
         return s / static_cast<double>(total);
     }
@@ -572,9 +572,9 @@ public:
 
             double prev_sum = 0.;
             for (size_t j = 0; j < std::min(i, bins.size()); j++) {
-                prev_sum += bins[j].count;
+                prev_sum += static_cast<double>(bins[j].count);
             }
-            prev_sum += bin_i.count / 2.;
+            prev_sum += static_cast<double>(bin_i.count) / 2.;
             return Bin::compute_sum(x, bin_i, bin_i1, prev_sum);
         }
     }
