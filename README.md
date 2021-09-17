@@ -1,4 +1,5 @@
 ![Building](https://github.com/guntersp/streamhist-cpp/actions/workflows/build_cmake.yml/badge.svg)
+[![Language grade: C++](https://img.shields.io/lgtm/grade/cpp/github/guntersp/streamhist-cpp)](https://lgtm.com/projects/g/guntersp/streamhist-cpp/context:cpp)
 
 # streamhist-cpp
 header only streamhist port in C++
