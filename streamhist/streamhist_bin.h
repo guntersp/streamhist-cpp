@@ -35,9 +35,9 @@ struct Bin {
      *      `count` points surrounding `value`, of which `count/2` points are
      *      to the left and `count/2` points are to the right.
      */
-    inline constexpr Bin(ValueType value, size_t count = 1) noexcept
-        : value(value)
-        , count(count) {}
+    inline constexpr Bin(ValueType _value, size_t _count = 1) noexcept
+        : value(_value)
+        , count(_count) {}
 
 
     /**

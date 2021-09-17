@@ -67,10 +67,10 @@ struct StreamHist {
     size_t missing_count = 0;
 
 
-    inline constexpr StreamHist(size_t maxbins = 64, bool weighted = false, size_t freeze = static_cast<size_t>(-1)) noexcept
-        : maxbins(maxbins)
-        , weighted(weighted)
-        , freeze(freeze) { }
+    inline constexpr StreamHist(size_t _maxbins = 64, bool _weighted = false, size_t _freeze = static_cast<size_t>(-1)) noexcept
+        : maxbins(_maxbins)
+        , weighted(_weighted)
+        , freeze(_freeze) { }
 
 
     inline constexpr bool empty() const noexcept { return total <= 0; }

@@ -117,7 +117,7 @@ inline static std::vector<double> linspace(double start, double stop, size_t num
     std::vector<double> r;
     r.reserve(num + 1);
     for (size_t i = 0; i < num + 1; i++) {
-        r.push_back(start + h * i);
+        r.push_back(start + h * static_cast<double>(i));
     }
     return r;
 }
